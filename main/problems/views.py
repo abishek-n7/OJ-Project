@@ -2,7 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from problems.models import Problem
 from django.http import HttpResponse
 from django.template import loader
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import logout
 
+@login_required(login_url='/login/')
 def problem_list(request):
     problemlist = Problem.objects.all()
     template = loader.get_template("problem_list.html")
@@ -11,16 +15,8 @@ def problem_list(request):
     }
     return HttpResponse(template.render(context, request))
 
-"""def problem_detail(request, id):
-    req_problem = Problem.objects.get(id=id)
-    template = loader.get_template("problem_detail.html")
-    context = {
-        "req_problem":req_problem,
-    }
-    return HttpResponse(template.render(context, request))"""
 
-from django.shortcuts import render
-
+@login_required(login_url='/login/')
 def problem_detail(request, id):
     req_problem = Problem.objects.get(id=id)
 
@@ -41,4 +37,3 @@ def problem_detail(request, id):
     }
 
     return render(request, "problem_detail.html", context)
-
