@@ -39,6 +39,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'autherisation',
     'problems',
+    'compiler',
+    'userprofile',
+    'contest',
 ]
 
 MIDDLEWARE = [

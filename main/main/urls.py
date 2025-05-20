@@ -23,4 +23,7 @@ urlpatterns = [
     path('', lambda request: redirect('register/')),  
     path('', include('autherisation.urls')),  
     path('problems/', include('problems.urls')),  
+    path('compiler/', include('compiler.urls')),
+    path('contest/', include('contest.urls')),
+    path('userprofile/', include('userprofile.urls')),
 ]
