@@ -76,17 +76,73 @@
 </head>
 
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container-fluid">
-        <a class="navbar-brand align-items-center" href="{% url 'problem_list' %}">Online Judge</a>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm px-4">
+    <a class="navbar-brand me-5" href="{% url 'problem_list' %}">OJ</a>
 
-        
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav me-auto">
+        <li class="nav-item me-5">
+            <a class="nav-link {% if request.path == '/problems/' %}active{% endif %}" href="{% url 'problem_list' %}">Problems</a>
+        </li>
+        <li class="nav-item me-5">
+            <a class="nav-link {% if request.path == '/contest/' %}active{% endif %}" href="{% url 'contest_page' %}">Contest</a>
+        </li>
+        <li class="nav-item me-5">
+            <a class="nav-link {% if request.path == '/userprofile/' %}active{% endif %}" href="{% url 'user_profile' %}">{{ request.user.username }}</a>
+        </li>
+        </ul>
+
+
+        <form method="post" action="{% url 'logout-user' %}" class="d-flex">
+        {% csrf_token %}
+        <button class="btn btn-outline-danger btn-sm" type="submit">Logout</button>
+        </form>
     </div>
-</nav>
+    </nav>
 
 
     <div class="container mt-5">
         <h2 class="mb-4">Problem List</h2>
+        <form method="get" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <input type="text" name="search" class="form-control" placeholder="Search by title"
+                    value="{{ search_query }}">
+            </div>
+
+            <div class="col-md-3">
+                <select name="topic" class="form-select">
+                    <option value="">All Topics</option>
+                    {% for topic in all_topics %}
+                    <option value="{{ topic }}" {% if topic == selected_topic %}selected{% endif %}>{{ topic }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <select name="difficulty" class="form-select">
+                    <option value="">All Difficulties</option>
+                    {% for difficulty in all_difficulties %}
+                        <option value="{{ difficulty }}" {% if difficulty|stringformat:"s" == selected_difficulty|stringformat:"s" %}selected{% endif %}>
+                        {{ difficulty }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+            </div>
+            
+            <div class="col-md-2">
+                <select name="solved" class="form-select">
+                    <option value="">All</option>
+                    <option value="solved" {% if solved_filter == "solved" %}selected{% endif %}>Solved</option>
+                    <option value="unsolved" {% if solved_filter == "unsolved" %}selected{% endif %}>Unsolved</option>
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-success w-100">Filter</button>
+            </div>
+        </form>
+
         <table class="custom-table">
             <thead>
                 <tr>
@@ -109,20 +165,20 @@
                     <td>{{ problem.topic }}</td>
                     <td>
                         {% if problem.difficulty|lower == 'easy' %}
-                            <span class="text-green">Easy</span>
+                        <span class="text-green">Easy</span>
                         {% elif problem.difficulty|lower == 'medium' %}
-                            <span class="text-yellow">Med.</span>
+                        <span class="text-yellow">Med.</span>
                         {% elif problem.difficulty|lower == 'hard' %}
-                            <span class="text-red">Hard</span>
+                        <span class="text-red">Hard</span>
                         {% else %}
-                            {{ problem.difficulty }}
+                        {{ problem.difficulty }}
                         {% endif %}
                     </td>
                     <td>
                         {% if problem.isSolved %}
-                            <span class="checkmark">&#10003;</span>
+                        <span class="checkmark">&#10003;</span>
                         {% else %}
-                            <span class="muted">–</span>
+                        <span class="muted">–</span>
                         {% endif %}
                     </td>
                 </tr>
