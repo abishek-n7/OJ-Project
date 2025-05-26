@@ -127,13 +127,19 @@
                 <div class="mb-3">
                     <textarea name="code" class="form-control" rows="20" placeholder="Write your code here..."
                         style="background-color: black; color: white;">{{ code|default_if_none:"" }}</textarea>
+                </div>
 
+                <div class="mb-3">
+                    <label for="custom_input" class="form-label">Custom Input (optional):</label>
+                    <textarea name="custom_input" id="custom_input" class="form-control" rows="4"
+                        style="background-color: black; color: white;">{{ custom_input|default_if_none:"" }}</textarea>
                 </div>
 
                 <div class="d-flex gap-2">
                     <button type="submit" name="action" value="run" class="btn btn-secondary">Run</button>
                     <button type="submit" name="action" value="submit" class="btn btn-success">Submit</button>
                 </div>
+
             </form>
 
             {% if submitted %}

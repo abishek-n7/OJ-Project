@@ -18,19 +18,28 @@ def handle_code(request, problem_id):
     output_lines = problem.output_testcase.strip().split('\n')
     explanations = problem.testcase_explanation.strip().split('\n') if problem.testcase_explanation else []
 
-    testcases = []
-    for i in range(len(input_lines)):
-        input_line = input_lines[i] if i < len(input_lines) else ''
-        output_line = output_lines[i] if i < len(output_lines) else ''
-        explanation_line = explanations[i] if i < len(explanations) else ''
-        testcases.append((input_line, output_line, explanation_line))
+    testcases = list(zip(input_lines, output_lines, explanations))
 
     if request.method == "POST":
         action = request.POST.get("action") 
         language = request.POST.get("language")
         code = request.POST.get("code")
+        custom_input = request.POST.get("custom_input", "").strip()
 
-        input_data = problem.input_testcase.strip()
+        # Decide input data
+        custom_input = request.POST.get("custom_input", "").strip()
+
+        if action == "run":
+            default_lines = problem.input_testcase.strip().splitlines()[:2]
+            custom_lines = custom_input.strip().splitlines() if custom_input else []
+            input_data = "\n".join(default_lines + custom_lines)
+            run_all = True  # Ensure all are run including custom
+        else:
+            input_data = problem.input_testcase.strip()
+            run_all = True  # Submit should run all
+
+
+
 
         run_all = action == "submit"
         output = run_code(language, code, input_data, run_all=run_all)
@@ -43,6 +52,7 @@ def handle_code(request, problem_id):
             "language": language,
             "code": code,
             "output": output,
+            "custom_input": custom_input,
         }
 
         if action == "submit":
@@ -53,21 +63,19 @@ def handle_code(request, problem_id):
             context["verdict"] = verdict
 
             if verdict == "Wrong Answer":
-                # Find first mismatch
                 for i, (exp, act) in enumerate(zip(expected_lines, actual_lines)):
                     if exp != act:
                         context["first_failed_output"] = f"Expected: {exp}\nGot: {act}"
                         break
                 else:
-                    # If expected is longer than actual or vice versa
                     if len(expected_lines) != len(actual_lines):
                         extra = "Missing Output" if len(actual_lines) < len(expected_lines) else "Extra Output"
                         context["first_failed_output"] = f"{extra}\nExpected: {expected_lines}\nGot: {actual_lines}"
 
-
         return render(request, "problem_detail.html", context)
 
     return redirect("problem_detail", problem_id=problem_id)
+
 
 
 
@@ -116,7 +124,9 @@ def run_code(language, code, input_data, run_all=True):
 
     results = []
     testcases = input_data.strip().splitlines()
-    testcases_to_run = testcases if run_all else testcases[:2]
+
+    testcases_to_run = testcases
+
 
     for testcase in testcases_to_run:
         unique = str(uuid.uuid4())
