@@ -7,9 +7,56 @@ import uuid
 import subprocess
 from pathlib import Path
 from problems.models import Problem
+import google.generativeai as genai
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+genai.configure(api_key=GEMINI_API_KEY)
 
 def normalize_output(output):
     return [line.strip() for line in output.strip().splitlines() if line.strip()]
+
+def get_ai_review(code, language, problem):
+    prompt = f"""
+You are reviewing a code submission for a programming problem. Ensure there is LESS THAN 12 words per line in output text, check language compatibility
+
+### Problem Statement:
+{problem.description}
+
+### Constraints:
+{problem.constraints}
+
+### Sample Input:
+{problem.input_testcase}
+
+### Expected Output:
+{problem.output_testcase}
+
+### Explanation:
+{problem.testcase_explanation}
+
+### User's {language} Code:
+{code}
+
+Please provide:
+- Code correctness evaluation
+- Any potential logic issues or edge cases
+- Suggestions for optimization
+- Adherence to best practices
+- Readability improvements
+- Dont give the corrected code. Let user do it himself
+"""
+
+    try:
+        model = genai.GenerativeModel("gemini-1.5-flash") 
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Error: {str(e)}"
+
 
 def handle_code(request, problem_id):
     problem = get_object_or_404(Problem, id=problem_id)
@@ -26,17 +73,28 @@ def handle_code(request, problem_id):
         code = request.POST.get("code")
         custom_input = request.POST.get("custom_input", "").strip()
 
-        # Decide input data
-        custom_input = request.POST.get("custom_input", "").strip()
+        if action == "ai_review":
+            review = get_ai_review(code, language, problem)
+            return render(request, "problem_detail.html", {
+                "req_problem": problem,
+                "code": code,
+                "custom_input": custom_input,
+                "submitted": True,
+                "action": action,
+                "ai_review": review,
+                "language": language,
+                "testcases": testcases,
+            })
+
 
         if action == "run":
             default_lines = problem.input_testcase.strip().splitlines()[:2]
             custom_lines = custom_input.strip().splitlines() if custom_input else []
             input_data = "\n".join(default_lines + custom_lines)
-            run_all = True  # Ensure all are run including custom
+            run_all = True  
         else:
             input_data = problem.input_testcase.strip()
-            run_all = True  # Submit should run all
+            run_all = True  
 
 
 

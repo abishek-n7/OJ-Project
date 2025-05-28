@@ -138,7 +138,9 @@
                 <div class="d-flex gap-2">
                     <button type="submit" name="action" value="run" class="btn btn-secondary">Run</button>
                     <button type="submit" name="action" value="submit" class="btn btn-success">Submit</button>
+                    <button type="submit" name="action" value="ai_review" class="btn btn-info">AI Review</button>
                 </div>
+
 
             </form>
 
@@ -167,7 +169,11 @@
             {% endif %}
             {% endif %}
 
-
+            {% if action == "ai_review" and ai_review %}
+                <hr>
+                <h5>AI Review</h5>
+                <pre class="bg-dark text-warning p-3 rounded">{{ ai_review }}</pre>
+            {% endif %}
 
         </div>
 
