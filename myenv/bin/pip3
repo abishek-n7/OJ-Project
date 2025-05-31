@@ -1,4 +1,4 @@
-#!/mnt/c/Users/LENOVO/Desktop/OJ/app/myenv/bin/python3
+#!/Users/abishekn/Desktop/OJ-Project/myenv/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys

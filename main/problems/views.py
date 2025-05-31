@@ -9,8 +9,6 @@ from compiler.views import run_code
 from compiler.models import CodeSubmission
 from django.db.models import Q
 
-from django.db.models import Q
-
 @login_required(login_url='/login/')
 def problem_list(request):
     search_query = request.GET.get("search", "")
