@@ -1,7 +1,6 @@
-# contest/models.py
 from django.db import models
-from django.conf import settings # To link to the User model
-from problems.models import Problem # Import the Problem model
+from django.conf import settings 
+from problems.models import Problem 
 
 class Contest(models.Model):
     name = models.CharField(max_length=255, help_text="Name of the contest")

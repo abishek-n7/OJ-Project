@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.template import loader
 from django.http import HttpResponse
 from django.contrib.auth import authenticate,login,logout
-# Create your views here.
 
 def register_user(request):
     if request.method == 'POST':
