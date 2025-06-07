@@ -153,7 +153,7 @@
             <pre class="bg-dark text-success p-2 rounded">{{ output }}</pre>
             {% elif action == "submit" %}
             {% if verdict == "Success" %}
-            <!-- All testcases passed: no output shown -->
+            
             {% else %}
             <p><strong>Testcase Output:</strong></p>
             <pre class="bg-dark text-danger p-2 rounded">{{ first_failed_output }}</pre>

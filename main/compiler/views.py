@@ -10,6 +10,10 @@ from problems.models import Problem
 import google.generativeai as genai
 from dotenv import load_dotenv
 import os
+from pathlib import Path
+import subprocess
+import uuid
+from django.conf import settings
 
 load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -170,11 +174,6 @@ def submit(request, problem_id):
 def run_code(language, code, input_data, run_all=True):
     if language == "python":
         language = "py"
-    
-    from pathlib import Path
-    import subprocess
-    import uuid
-    from django.conf import settings
 
     base_path = Path(settings.BASE_DIR)
     codes_dir = base_path / "codes"
@@ -192,13 +191,11 @@ def run_code(language, code, input_data, run_all=True):
         input_file = codes_dir / f"{unique}.in"
         output_file = codes_dir / f"{unique}.out"
 
-        # Save user code and testcase
         with open(code_file, "w") as f:
             f.write(code)
         with open(input_file, "w") as f:
             f.write(testcase)
 
-        # Execution
         if language == "cpp":
             exe_file = codes_dir / f"{unique}.out.exe"
             compile = subprocess.run(["g++", str(code_file), "-o", str(exe_file)])
