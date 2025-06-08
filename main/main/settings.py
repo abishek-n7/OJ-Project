@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 import os
 from pathlib import Path
 import dj_database_url
+from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -51,6 +52,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -84,12 +86,8 @@ WSGI_APPLICATION = 'main.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        # This is the key part: it tries to get the database URL from
-        # the 'DATABASE_URL' environment variable.
-        # If DATABASE_URL is not set (e.g., in local development without the variable),
-        # it will fall back to SQLite.  You can remove the fallback if you *only* want to use Neon.
-        default=os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR}/db.sqlite3'),
-        conn_max_age=600  # Optional: keep connections alive for performance
+        default=os.environ.get('DATABASE_URL', f'sqlite:///{BASE_DIR / "db.sqlite3"}'),
+        conn_max_age=600 # Keep connections alive for performance
     )
 }
 
@@ -129,6 +127,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
