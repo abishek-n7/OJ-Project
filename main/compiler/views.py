@@ -124,13 +124,13 @@ def handle_code(request, problem_id):
             verdict = "Success" if expected_lines == actual_lines else "Wrong Answer"
             context["verdict"] = verdict
 
-            if verdict == "Success": # This is the condition from your snippet
-                problem = get_object_or_404(Problem, id=problem_id) # Ensure you have the problem object
-                user = request.user # Get the current logged-in user
+            if verdict == "Success": 
+                problem = get_object_or_404(Problem, id=problem_id) 
+                user = request.user 
 
-                # Check if the user hasn't already solved this problem
-                if not problem.get_is_solved_for_user(user): # Using the helper method
-                    problem.solved_by.add(user) # Mark as solved for this specific user
+                
+                if not problem.get_is_solved_for_user(user): 
+                    problem.solved_by.add(user) 
 
             if verdict == "Wrong Answer":
                 for i, (exp, act) in enumerate(zip(expected_lines, actual_lines)):

@@ -118,14 +118,10 @@ def problem_detail(request, problem_id):
 @require_POST
 def save_problem(request, problem_id):
     problem = get_object_or_404(Problem, id=problem_id)
-    user = request.user # Get the current logged-in user
-
+    user = request.user 
     if problem.saved_by.filter(id=user.id).exists():
-        # If the problem is already saved by this user, unsave it
         problem.saved_by.remove(user)
     else:
-        # If the problem is not saved by this user, save it
         problem.saved_by.add(user)
 
-    # Redirect back to the problem detail page
     return redirect("problem_detail", problem_id=problem_id)
