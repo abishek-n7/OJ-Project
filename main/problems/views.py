@@ -8,6 +8,8 @@ from django.contrib.auth import logout
 from compiler.views import run_code
 from compiler.models import CodeSubmission
 from django.db.models import Q
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='/login/')
 def problem_list(request):
@@ -53,7 +55,11 @@ def problem_list(request):
 
 @login_required(login_url='/login/')
 def problem_detail(request, problem_id):
-    req_problem = Problem.objects.get(id=problem_id)
+    req_problem = get_object_or_404(Problem, id=problem_id)
+    user = request.user
+
+    req_problem.is_solved_by_current_user = req_problem.get_is_solved_for_user(user)
+    req_problem.is_saved_by_current_user = req_problem.get_is_saved_for_user(user)
 
     input_lines = req_problem.input_testcase.strip().split('\n')
     output_lines = req_problem.output_testcase.strip().split('\n')
@@ -69,22 +75,57 @@ def problem_detail(request, problem_id):
     context = {
         "req_problem": req_problem,
         "testcases": testcases,
+        "language": "python",
+        "code": "",
+        "custom_input": "",
+        "output": "",
+        "submitted": False,
+        "action": None,
     }
 
     if request.method == "POST":
         language = request.POST.get("language")
         code = request.POST.get("code")
         action = request.POST.get("action")
-
-        input_data = req_problem.input_testcase.strip()
-        output_data = run_code(language, code, input_data)
+        custom_input = request.POST.get("custom_input", "")
 
         context.update({
-            "submitted": True,
             "language": language,
             "code": code,
-            "output": output_data,
+            "custom_input": custom_input,
+            "submitted": True,
             "action": action,
         })
 
+        input_data_for_run = custom_input if action == "run" else req_problem.input_testcase.strip()
+
+        output_data = run_code(language, code, input_data_for_run)
+
+        context.update({
+            "output": output_data,
+        })
+
+        if action == "submit" and output_data == req_problem.output_testcase.strip():
+            user = request.user
+            if user.is_authenticated and not req_problem.get_is_solved_for_user(user):
+                req_problem.solved_by.add(user)
+
     return render(request, "problem_detail.html", context)
+
+
+
+@login_required 
+@require_POST
+def save_problem(request, problem_id):
+    problem = get_object_or_404(Problem, id=problem_id)
+    user = request.user # Get the current logged-in user
+
+    if problem.saved_by.filter(id=user.id).exists():
+        # If the problem is already saved by this user, unsave it
+        problem.saved_by.remove(user)
+    else:
+        # If the problem is not saved by this user, save it
+        problem.saved_by.add(user)
+
+    # Redirect back to the problem detail page
+    return redirect("problem_detail", problem_id=problem_id)

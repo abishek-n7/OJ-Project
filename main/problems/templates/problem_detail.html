@@ -119,10 +119,8 @@
                         <option value="python" {% if language == "python" %}selected{% endif %}>Python</option>
                         <option value="cpp" {% if language == "cpp" %}selected{% endif %}>C++</option>
                         <option value="java" {% if language == "java" %}selected{% endif %}>Java</option>
-
                     </select>
                 </div>
-
 
                 <div class="mb-3">
                     <textarea name="code" class="form-control" rows="20" placeholder="Write your code here..."
@@ -140,9 +138,26 @@
                     <button type="submit" name="action" value="submit" class="btn btn-success">Submit</button>
                     <button type="submit" name="action" value="ai_review" class="btn btn-info">AI Review</button>
                 </div>
-
-
             </form>
+
+            <div class="d-flex justify-content-end mt-3">
+                <form method="POST" action="{% url 'save_problem' req_problem.id %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-warning">
+                        {% if req_problem.is_saved_by_current_user %} {# <--- CHANGED! #}
+                            Unsave
+                        {% else %}
+                            Save
+                        {% endif %}
+                    </button>
+                </form>
+            </div>
+
+            {% if req_problem.is_solved_by_current_user %} 
+                <p class="text-green mt-3">You have solved this problem! &#10003;</p>
+            {% else %}
+                <p class="muted mt-3">You have not solved this problem yet.</p>
+            {% endif %}
 
             {% if submitted %}
             <hr>
@@ -150,10 +165,18 @@
 
             {% if action == "run" %}
             <p><strong>Output:</strong></p>
-            <pre class="bg-dark text-success p-2 rounded">{{ output }}</pre>
+            <pre class="bg-dark p-2 rounded" style="font-family: inherit;">
+            {% for line in output.splitlines %}
+            {% if "Time Limit Exceeded" in line %}
+            <span style="color: #ff4d4f;">{{ line }}</span>
+            {% else %}
+            <span class="text-success">{{ line }}</span>
+            {% endif %}
+            {% endfor %}
+            </pre>
             {% elif action == "submit" %}
             {% if verdict == "Success" %}
-            
+
             {% else %}
             <p><strong>Testcase Output:</strong></p>
             <pre class="bg-dark text-danger p-2 rounded">{{ first_failed_output }}</pre>
