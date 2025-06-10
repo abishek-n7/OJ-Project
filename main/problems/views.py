@@ -19,6 +19,7 @@ def problem_list(request):
     solved_filter = request.GET.get("solved", "")
 
     problems = Problem.objects.all()
+    user = request.user
 
     if search_query:
         problems = problems.filter(title__icontains=search_query)
@@ -30,12 +31,15 @@ def problem_list(request):
         problems = problems.filter(difficulty=selected_difficulty)
 
     if solved_filter == "solved":
-        problems = problems.filter(isSolved=True)
+        problems = problems.filter(solved_by=user)
     elif solved_filter == "unsolved":
-        problems = problems.filter(isSolved=False)
+        problems = problems.exclude(solved_by=user)
 
     all_topics = Problem.objects.values_list("topic", flat=True).distinct()
     all_difficulties = Problem.objects.values_list("difficulty", flat=True).distinct()
+
+    for problem in problems:
+        problem.isSolved = problem.get_is_solved_for_user(user)
 
     context = {
         "problemlist": problems,
