@@ -90,20 +90,22 @@ def handle_code(request, problem_id):
                 "testcases": testcases,
             })
 
-
+        # --- Fix starts here ---
         if action == "run":
-            default_lines = problem.input_testcase.strip().splitlines()[:2]
-            custom_lines = custom_input.strip().splitlines() if custom_input else []
-            input_data = "\n".join(default_lines + custom_lines)
-            run_all = True  
+            if custom_input:
+                input_data = custom_input
+            else:
+                # Show output for the first 2 default test cases if no custom input
+                input_data = "\n".join(problem.input_testcase.strip().splitlines()[:2])
+            run_all = False
+        elif action == "submit":
+            input_data = problem.input_testcase.strip()
+            run_all = True
         else:
             input_data = problem.input_testcase.strip()
-            run_all = True  
+            run_all = True
+        # --- Fix ends here ---
 
-
-
-
-        run_all = action == "submit"
         output = run_code(language, code, input_data, run_all=run_all)
 
         context = {
@@ -127,8 +129,6 @@ def handle_code(request, problem_id):
             if verdict == "Success": 
                 problem = get_object_or_404(Problem, id=problem_id) 
                 user = request.user 
-
-                
                 if not problem.get_is_solved_for_user(user): 
                     problem.solved_by.add(user) 
 

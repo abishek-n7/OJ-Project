@@ -128,9 +128,25 @@
             <p>Total Questions Solved: <strong class="text-green">{{ total_solved_questions }}</strong></p>
         </div>
 
-        <h3 class="mb-4">Saved Questions</h3>
+        <div class="mb-4 d-flex gap-2">
+            <a href="{% url 'user_profile' %}?view=saved" class="btn {% if view_type == 'saved' %}btn-warning{% else %}btn-outline-warning{% endif %}">
+                Saved Questions
+            </a>
+            <a href="{% url 'user_profile' %}?view=solved" class="btn {% if view_type == 'solved' %}btn-success{% else %}btn-outline-success{% endif %}">
+                Solved Questions
+            </a>
+        </div>
+
+        <h3 class="mb-4">
+            {% if view_type == "solved" %}
+                Solved Questions
+            {% else %}
+                Saved Questions
+            {% endif %}
+        </h3>
 
         <form method="get" class="row g-3 mb-4">
+            <input type="hidden" name="view" value="{{ view_type }}">
             <div class="col-md-4">
                 <input type="text" name="search" class="form-control" placeholder="Search by title"
                     value="{{ search_query }}">
@@ -177,7 +193,7 @@
                 </tr>
             </thead>
             <tbody>
-                {% for problem in saved_problems %}
+                {% for problem in problems %}
                 <tr class="{% cycle 'row-dark' 'row-darker' %}">
                     <td>{{ forloop.counter }}</td>
                     <td>
@@ -198,7 +214,7 @@
                         {% endif %}
                     </td>
                     <td>
-                        {% if problem.is_solved_by_current_user %} {# <--- CHANGED! #}
+                        {% if problem.is_solved_by_current_user %}
                         <span class="checkmark">&#10003;</span>
                         {% else %}
                         <span class="muted">–</span>
@@ -207,7 +223,9 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="5" class="text-center muted">No saved problems match your criteria.</td>
+                    <td colspan="5" class="text-center muted">
+                        No {% if view_type == "solved" %}solved{% else %}saved{% endif %} problems match your criteria.
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>

@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
 
-@login_required(login_url='/login/')
 def problem_list(request):
     search_query = request.GET.get("search", "")
     selected_topic = request.GET.get("topic", "")
@@ -30,16 +29,18 @@ def problem_list(request):
     if selected_difficulty:
         problems = problems.filter(difficulty=selected_difficulty)
 
-    if solved_filter == "solved":
-        problems = problems.filter(solved_by=user)
-    elif solved_filter == "unsolved":
-        problems = problems.exclude(solved_by=user)
+    if user.is_authenticated:
+        if solved_filter == "solved":
+            problems = problems.filter(solved_by=user)
+        elif solved_filter == "unsolved":
+            problems = problems.exclude(solved_by=user)
+    # If not authenticated, don't filter by solved/unsolved
 
     all_topics = Problem.objects.values_list("topic", flat=True).distinct()
     all_difficulties = Problem.objects.values_list("difficulty", flat=True).distinct()
 
     for problem in problems:
-        problem.isSolved = problem.get_is_solved_for_user(user)
+        problem.isSolved = problem.get_is_solved_for_user(user) if user.is_authenticated else False
 
     context = {
         "problemlist": problems,
