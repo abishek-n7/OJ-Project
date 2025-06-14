@@ -106,7 +106,10 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-
+CSRF_TRUSTED_ORIGINS = [
+    "https://collabcode.xyz",
+    "https://www.collabcode.xyz"  # Optional, if you’re using www
+]
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
